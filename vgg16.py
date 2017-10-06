@@ -270,7 +270,7 @@ class vgg16:
         heatmap = tf.squeeze(tf.tensordot(self.conv5_3, weights, [[3], [0]]))
         #print 'heatmap size ', heatmap.get_shape()
         #print heatmap
-        self.heatmap = heatmap
+        self.heatmap = tf.nn.relu(heatmap)
         
         
         
