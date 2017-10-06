@@ -20,7 +20,7 @@ class vgg16:
         self.convlayers()
         self.fc_layers()
         self.probs = tf.nn.softmax(self.fc3l)
-        self.heat_map(label)
+        self.heat_map(self.pool5, label)
         if weights is not None and sess is not None:
             self.load_weights(weights, sess)
 
@@ -252,11 +252,11 @@ class vgg16:
         for i, k in enumerate(keys):
             print i, k, np.shape(weights[k])
             sess.run(self.parameters[i].assign(weights[k]))
-    def heat_map(self, category):
+    def heat_map(self, layer, category):
         #print 'probs shape ', self.probs.get_shape()
         target = self.probs[0, category]
         grads = tf.gradients(target,
-                             self.pool5,
+                             layer,
                              grad_ys=None,
                              name='gradients')[0]
         print 'grads', grads.get_shape()
@@ -267,7 +267,7 @@ class vgg16:
         #weights = tf.expand_dims(weights, 0)
         #dims = self.conv5_3.get_shape()
         #weights = tf.tile(weights, [dims[0], dims[1], dim[2], 1])
-        heatmap = tf.squeeze(tf.tensordot(self.conv5_3, weights, [[3], [0]]))
+        heatmap = tf.squeeze(tf.tensordot(layer, weights, [[3], [0]]))
         #print 'heatmap size ', heatmap.get_shape()
         #print heatmap
         self.heatmap = tf.nn.relu(heatmap)
