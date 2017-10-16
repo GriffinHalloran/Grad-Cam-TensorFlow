@@ -12,6 +12,8 @@ import tensorflow as tf
 import numpy as np
 from scipy.misc import imread, imresize, toimage, imsave
 from imagenet_classes import class_names
+from tensorflow.python.framework import ops
+from tensorflow.python.ops import gen_nn_ops
 
 
 class vgg16:
@@ -23,6 +25,10 @@ class vgg16:
         self.heat_map(self.pool5, label)
         if weights is not None and sess is not None:
             self.load_weights(weights, sess)
+
+    @ops.RegisterGradient("GuidedRelu")
+    def _GuidedReluGrad(op, grad):
+        return tf.select(0. < grad, gen_nn_ops._relu_grad(grad, op.outputs[0]), tf.zeros(grad.get_shape()))
 
 
     def convlayers(self):
@@ -121,7 +127,9 @@ class vgg16:
             biases = tf.Variable(tf.constant(0.0, shape=[256], dtype=tf.float32),
                                  trainable=True, name='biases')
             out = tf.nn.bias_add(conv, biases)
-            self.conv3_3 = tf.nn.relu(out, name=scope)
+            g = tf.get_default_graph()
+            with g.gradient_override_map({'Relu': 'GuidedRelu'}):
+                self.conv3_3 = tf.nn.relu(out, name=scope)
             self.parameters += [kernel, biases]
 
         # pool3
@@ -271,10 +279,10 @@ class vgg16:
         #print 'heatmap size ', heatmap.get_shape()
         #print heatmap
         self.heatmap = tf.nn.relu(heatmap)
-        
-        
-        
-## This part is for deconv        
+
+
+
+## This part is for deconv
 #class heat_map:
 #    def __init__(self, image, sess, vgg_model, category):
 #        '''
