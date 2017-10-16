@@ -22,13 +22,14 @@ class vgg16:
         self.convlayers()
         self.fc_layers()
         self.probs = tf.nn.softmax(self.fc3l)
-        self.heat_map(self.pool2, label)
+        # self.heat_map(self.pool2, label)
+        self.heat_map(self.conv3_1, label)
         if weights is not None and sess is not None:
             self.load_weights(weights, sess)
 
     @ops.RegisterGradient("GuidedRelu")
     def _GuidedReluGrad(op, grad):
-        return tf.select(0. < grad, gen_nn_ops._relu_grad(grad, op.outputs[0]), tf.zeros(grad.get_shape()))
+        return tf.where(0. < grad, gen_nn_ops._relu_grad(grad, op.outputs[0]), tf.zeros(tf.shape(grad)))
 
 
     def convlayers(self):
@@ -47,7 +48,9 @@ class vgg16:
             biases = tf.Variable(tf.constant(0.0, shape=[64], dtype=tf.float32),
                                  trainable=True, name='biases')
             out = tf.nn.bias_add(conv, biases)
-            self.conv1_1 = tf.nn.relu(out, name=scope)
+            g = tf.get_default_graph()
+            with g.gradient_override_map({'Relu': 'GuidedRelu'}):
+                self.conv1_1 = tf.nn.relu(out, name=scope)
             self.parameters += [kernel, biases]
 
         # conv1_2
@@ -58,7 +61,9 @@ class vgg16:
             biases = tf.Variable(tf.constant(0.0, shape=[64], dtype=tf.float32),
                                  trainable=True, name='biases')
             out = tf.nn.bias_add(conv, biases)
-            self.conv1_2 = tf.nn.relu(out, name=scope)
+            g = tf.get_default_graph()
+            with g.gradient_override_map({'Relu': 'GuidedRelu'}):
+                self.conv1_2 = tf.nn.relu(out, name=scope)
             self.parameters += [kernel, biases]
 
         # pool1
@@ -76,7 +81,9 @@ class vgg16:
             biases = tf.Variable(tf.constant(0.0, shape=[128], dtype=tf.float32),
                                  trainable=True, name='biases')
             out = tf.nn.bias_add(conv, biases)
-            self.conv2_1 = tf.nn.relu(out, name=scope)
+            g = tf.get_default_graph()
+            with g.gradient_override_map({'Relu': 'GuidedRelu'}):
+                self.conv2_1 = tf.nn.relu(out, name=scope)
             self.parameters += [kernel, biases]
 
         # conv2_2
@@ -87,7 +94,9 @@ class vgg16:
             biases = tf.Variable(tf.constant(0.0, shape=[128], dtype=tf.float32),
                                  trainable=True, name='biases')
             out = tf.nn.bias_add(conv, biases)
-            self.conv2_2 = tf.nn.relu(out, name=scope)
+            g = tf.get_default_graph()
+            with g.gradient_override_map({'Relu': 'GuidedRelu'}):
+                self.conv2_2 = tf.nn.relu(out, name=scope)
             self.parameters += [kernel, biases]
 
         # pool2
@@ -105,7 +114,9 @@ class vgg16:
             biases = tf.Variable(tf.constant(0.0, shape=[256], dtype=tf.float32),
                                  trainable=True, name='biases')
             out = tf.nn.bias_add(conv, biases)
-            self.conv3_1 = tf.nn.relu(out, name=scope)
+            g = tf.get_default_graph()
+            with g.gradient_override_map({'Relu': 'GuidedRelu'}):
+                self.conv3_1 = tf.nn.relu(out, name=scope)
             self.parameters += [kernel, biases]
 
         # conv3_2
@@ -116,7 +127,9 @@ class vgg16:
             biases = tf.Variable(tf.constant(0.0, shape=[256], dtype=tf.float32),
                                  trainable=True, name='biases')
             out = tf.nn.bias_add(conv, biases)
-            self.conv3_2 = tf.nn.relu(out, name=scope)
+            g = tf.get_default_graph()
+            with g.gradient_override_map({'Relu': 'GuidedRelu'}):
+                self.conv3_2 = tf.nn.relu(out, name=scope)
             self.parameters += [kernel, biases]
 
         # conv3_3
@@ -147,7 +160,9 @@ class vgg16:
             biases = tf.Variable(tf.constant(0.0, shape=[512], dtype=tf.float32),
                                  trainable=True, name='biases')
             out = tf.nn.bias_add(conv, biases)
-            self.conv4_1 = tf.nn.relu(out, name=scope)
+            g = tf.get_default_graph()
+            with g.gradient_override_map({'Relu': 'GuidedRelu'}):
+                self.conv4_1 = tf.nn.relu(out, name=scope)
             self.parameters += [kernel, biases]
 
         # conv4_2
@@ -158,7 +173,9 @@ class vgg16:
             biases = tf.Variable(tf.constant(0.0, shape=[512], dtype=tf.float32),
                                  trainable=True, name='biases')
             out = tf.nn.bias_add(conv, biases)
-            self.conv4_2 = tf.nn.relu(out, name=scope)
+            g = tf.get_default_graph()
+            with g.gradient_override_map({'Relu': 'GuidedRelu'}):
+                self.conv4_2 = tf.nn.relu(out, name=scope)
             self.parameters += [kernel, biases]
 
         # conv4_3
@@ -169,7 +186,9 @@ class vgg16:
             biases = tf.Variable(tf.constant(0.0, shape=[512], dtype=tf.float32),
                                  trainable=True, name='biases')
             out = tf.nn.bias_add(conv, biases)
-            self.conv4_3 = tf.nn.relu(out, name=scope)
+            g = tf.get_default_graph()
+            with g.gradient_override_map({'Relu': 'GuidedRelu'}):
+                self.conv4_3 = tf.nn.relu(out, name=scope)
             self.parameters += [kernel, biases]
 
         # pool4
@@ -187,7 +206,9 @@ class vgg16:
             biases = tf.Variable(tf.constant(0.0, shape=[512], dtype=tf.float32),
                                  trainable=True, name='biases')
             out = tf.nn.bias_add(conv, biases)
-            self.conv5_1 = tf.nn.relu(out, name=scope)
+            g = tf.get_default_graph()
+            with g.gradient_override_map({'Relu': 'GuidedRelu'}):
+                self.conv5_1 = tf.nn.relu(out, name=scope)
             self.parameters += [kernel, biases]
 
         # conv5_2
@@ -198,7 +219,9 @@ class vgg16:
             biases = tf.Variable(tf.constant(0.0, shape=[512], dtype=tf.float32),
                                  trainable=True, name='biases')
             out = tf.nn.bias_add(conv, biases)
-            self.conv5_2 = tf.nn.relu(out, name=scope)
+            g = tf.get_default_graph()
+            with g.gradient_override_map({'Relu': 'GuidedRelu'}):
+                self.conv5_2 = tf.nn.relu(out, name=scope)
             self.parameters += [kernel, biases]
 
         # conv5_3
@@ -209,7 +232,9 @@ class vgg16:
             biases = tf.Variable(tf.constant(0.0, shape=[512], dtype=tf.float32),
                                  trainable=True, name='biases')
             out = tf.nn.bias_add(conv, biases)
-            self.conv5_3 = tf.nn.relu(out, name=scope)
+            g = tf.get_default_graph()
+            with g.gradient_override_map({'Relu': 'GuidedRelu'}):
+                self.conv5_3 = tf.nn.relu(out, name=scope)
             self.parameters += [kernel, biases]
 
         # pool5
