@@ -14,7 +14,7 @@ from scipy.misc import imread, imresize, toimage, imsave
 from imagenet_classes import class_names
 from tensorflow.python.framework import ops
 from tensorflow.python.ops import gen_nn_ops
-
+import double2image
 
 class vgg16:
     def __init__(self, imgs, weights=None, sess=None, label=1):
@@ -22,7 +22,7 @@ class vgg16:
         self.convlayers()
         self.fc_layers()
         self.probs = tf.nn.softmax(self.fc3l)
-        self.heat_map(self.pool5, label)
+        self.heat_map(self.pool2, label)
         if weights is not None and sess is not None:
             self.load_weights(weights, sess)
 
@@ -307,6 +307,7 @@ if __name__ == '__main__':
     heatmap = np.array(ll[1])
     print heatmap
     heatmap = toimage(heatmap)
+    #heatmap = double2image.to_image(heatmap)
     heatmap = imresize(heatmap, (224, 224))
     imsave('out.png', heatmap)
     print np.shape(prob)
