@@ -13,7 +13,7 @@ import numpy as np
 from scipy.misc import imread, imresize, toimage, imsave
 from imagenet_classes import class_names
 import double2image
-
+from cleverhans.attacks_tf import fgsm
 class vgg16:
     def __init__(self, imgs, weights=None, sess=None, label=1):
         self.imgs = imgs
@@ -237,7 +237,7 @@ class vgg16:
             self.parameters += [fc2w, fc2b]
 
         # fc3
-        with tf.name_scope('fc3') as scope:
+        with tf.name_scope('probs') as scope:
             fc3w = tf.Variable(tf.truncated_normal([4096, 1000],
                                                          dtype=tf.float32,
                                                          stddev=1e-1), name='weights')
@@ -291,13 +291,19 @@ if __name__ == '__main__':
     sess = tf.Session()
     imgs = tf.placeholder(tf.float32, [None, 224, 224, 3])
     vgg = vgg16(imgs, 'vgg16_weights.npz', sess, 242)
-
-    img1 = imread('cat_dog.jpg', mode='RGB')
+    img1 = imread('panda_gibbon.png', mode='RGB')
     img1 = imresize(img1, (224, 224))
-    ll = sess.run([vgg.probs, vgg.heatmap], feed_dict={vgg.imgs: [img1]})
+    print type(tf.convert_to_tensor(img1)), type([img1]) 
+#    fgsm = FastGradientMethod(vgg, sess)
+    img2 = tf.convert_to_tensor(img1)
+    adv_img = fgsm(imgs, vgg.probs)
+#    print 'adv:', adv_img.shape
+#    imsave('adv.png', toimage(adv_img.eval(session = sess)))
+    ll = sess.run([vgg.probs, vgg.heatmap, adv_img], feed_dict={vgg.imgs: [img1]})
+    #ll = sess.run([vgg.probs, vgg.heatmap, adv_img], feed_dict={vgg.imgs: ll[2]})
     prob = ll[0][0]
     heatmap = np.array(ll[1])
-    print heatmap
+    print np.array(ll[2])
     heatmap = toimage(heatmap)
     #heatmap = double2image.to_image(heatmap)
     heatmap = imresize(heatmap, (224, 224))
