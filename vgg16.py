@@ -23,7 +23,7 @@ class vgg16:
         self.fc_layers()
         self.probs = tf.nn.softmax(self.fc3l)
         # self.heat_map(self.pool2, label)
-        self.heat_map(self.conv3_1, label)
+        self.heat_map(self.conv5_3, label)
         if weights is not None and sess is not None:
             self.load_weights(weights, sess)
 
@@ -323,7 +323,7 @@ class vgg16:
 if __name__ == '__main__':
     sess = tf.Session()
     imgs = tf.placeholder(tf.float32, [None, 224, 224, 3])
-    vgg = vgg16(imgs, 'vgg16_weights.npz', sess, 242)
+    vgg = vgg16(imgs, 'vgg16_weights.npz', sess, 282)
 
     img1 = imread('cat_dog.jpg', mode='RGB')
     img1 = imresize(img1, (224, 224))
@@ -331,8 +331,8 @@ if __name__ == '__main__':
     prob = ll[0][0]
     heatmap = np.array(ll[1])
     print heatmap
-    heatmap = toimage(heatmap)
-    #heatmap = double2image.to_image(heatmap)
+    #heatmap = toimage(heatmap)
+    heatmap = double2image.to_image(heatmap)
     heatmap = imresize(heatmap, (224, 224))
     imsave('out.png', heatmap)
     print np.shape(prob)
