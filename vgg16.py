@@ -24,6 +24,7 @@ class vgg16:
         self.probs = tf.nn.softmax(self.fc3l)
         # self.heat_map(self.pool2, label)
         self.heat_map(self.conv5_3, label)
+        # self.heat_map(self.imgs, label)
         if weights is not None and sess is not None:
             self.load_weights(weights, sess)
 
@@ -292,9 +293,10 @@ class vgg16:
                              layer,
                              grad_ys=None,
                              name='gradients')[0]
-        print 'grads', grads.get_shape()
+        # print 'grads', grads.get_shape()
+        print grads
         weights = tf.reduce_sum(grads, axis = [0, 1, 2])
-        print weights.get_shape()
+        # print weights.get_shape()
         #weights = tf.expand_dims(weights, 0)
         #weights = tf.expand_dims(weights, 0)
         #weights = tf.expand_dims(weights, 0)
@@ -323,7 +325,7 @@ class vgg16:
 if __name__ == '__main__':
     sess = tf.Session()
     imgs = tf.placeholder(tf.float32, [None, 224, 224, 3])
-    vgg = vgg16(imgs, 'vgg16_weights.npz', sess, 282)
+    vgg = vgg16(imgs, 'vgg16_weights.npz', sess, 242)
 
     img1 = imread('cat_dog.jpg', mode='RGB')
     img1 = imresize(img1, (224, 224))
