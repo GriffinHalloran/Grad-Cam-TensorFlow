@@ -291,7 +291,7 @@ if __name__ == '__main__':
     sess = tf.Session()
     imgs = tf.placeholder(tf.float32, [None, 224, 224, 3])
     vgg = vgg16(imgs, 'vgg16_weights.npz', sess, 242)
-    img1 = imread('panda_gibbon.png', mode='RGB')
+    img1 = imread('cat_dog.jpg', mode='RGB')
     img1 = imresize(img1, (224, 224))
     print type(tf.convert_to_tensor(img1)), type([img1]) 
 #    fgsm = FastGradientMethod(vgg, sess)
@@ -300,7 +300,10 @@ if __name__ == '__main__':
 #    print 'adv:', adv_img.shape
 #    imsave('adv.png', toimage(adv_img.eval(session = sess)))
     ll = sess.run([vgg.probs, vgg.heatmap, adv_img], feed_dict={vgg.imgs: [img1]})
-    #ll = sess.run([vgg.probs, vgg.heatmap, adv_img], feed_dict={vgg.imgs: ll[2]})
+    ll = sess.run([vgg.probs, vgg.heatmap, adv_img], feed_dict={vgg.imgs: ll[2]})
+    print ll[2][0,:,:,:].shape
+    imsave('adv.png', toimage(ll[2][0,:,:,:]))
+
     prob = ll[0][0]
     heatmap = np.array(ll[1])
     print np.array(ll[2])
