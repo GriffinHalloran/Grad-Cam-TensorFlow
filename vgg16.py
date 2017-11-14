@@ -324,8 +324,10 @@ if __name__ == '__main__':
     #heatmap = np.array(ll[1])
     heatmap = ll[1]
     #print heatmap
-    print heatmap[1]
-    gradCam = toimage(np.array(heatmap[0]))
+
+    gradCam = np.array(heatmap[0][0])
+    print np.shape(gradCam)
+    gradCam = toimage(gradCam)
     #heatmap = double2image.to_image(heatmap)
     gradCam = imresize(gradCam, (224, 224))
     imsave('gradCam.png', gradCam)
