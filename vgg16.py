@@ -325,19 +325,23 @@ if __name__ == '__main__':
     heatmap = ll[1]
     #print heatmap
 
-    gradCam = np.array(heatmap[0][0])
-    print np.shape(gradCam)
-    gradCam = toimage(gradCam)
-    #heatmap = double2image.to_image(heatmap)
-    gradCam = imresize(gradCam, (224, 224))
-    imsave('gradCam.png', gradCam)
+    # gradCam = np.array(heatmap[0][0]) # [7, 7, 512]
+    # print np.shape(gradCam)
+    # gradCam = toimage(gradCam)
+    # #heatmap = double2image.to_image(heatmap)
+    # gradCam = imresize(gradCam, (224, 224))
+    # imsave('gradCam.png', gradCam)
 
-    gb = toimage(np.array(heatmap[1]))
-    #heatmap = double2image.to_image(heatmap)
-    gb = imresize(gb, (224, 224))
-    imsave('gb.png', gb)
+    # gb = np.array(heatmap[1][0])   # [7, 7, 512]
+    # print np.shape(gb)
+    # gb = toimage(gb)
+    # #heatmap = double2image.to_image(heatmap)
+    # gb = imresize(gb, (224, 224))
+    # imsave('gb.png', gb)
 
-    guidedGradCam = toimage(np.array(heatmap[2]))
+    guidedGradCam = np.array(heatmap[2][0]) # [224, 224, 3]
+    print np.shape(guidedGradCam)
+    guidedGradCam = toimage(guidedGradCam)
     #heatmap = double2image.to_image(heatmap)
     guidedGradCam = imresize(guidedGradCam, (224, 224))
     imsave('guidedGradCam.png', guidedGradCam)
