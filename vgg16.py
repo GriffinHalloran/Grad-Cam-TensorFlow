@@ -304,7 +304,7 @@ if __name__ == '__main__':
     heatmap = toimage(heatmap)
     #heatmap = double2image.to_image(heatmap)
     heatmap = imresize(heatmap, (224, 224))
-    imsave('out.png', heatmap)
+    imsave('gradcam.png', heatmap)
     print np.shape(prob)
     print np.shape(heatmap)
     print heatmap
