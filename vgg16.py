@@ -13,6 +13,7 @@ import numpy as np
 from scipy.misc import imread, imresize, toimage, imsave
 from imagenet_classes import class_names
 import double2image
+from heatmap import GradCam
 
 class vgg16:
     def __init__(self, imgs, weights=None, sess=None, label=1):
@@ -20,7 +21,7 @@ class vgg16:
         self.convlayers()
         self.fc_layers()
         self.probs = tf.nn.softmax(self.fc3l)
-        self.heat_map(self.pool2, label)
+        #self.heat_map(self.pool2, label)
         if weights is not None and sess is not None:
             self.load_weights(weights, sess)
 
@@ -294,7 +295,9 @@ if __name__ == '__main__':
 
     img1 = imread('cat_dog.jpg', mode='RGB')
     img1 = imresize(img1, (224, 224))
-    ll = sess.run([vgg.probs, vgg.heatmap], feed_dict={vgg.imgs: [img1]})
+    gradcam = GradCam(vgg.probs, vgg.pool5)
+    tf.summary.FileWriter('tf.log', sess.graph)
+    ll = sess.run([vgg.probs, gradcam.heatmap], feed_dict={vgg.imgs: [img1]})
     prob = ll[0][0]
     heatmap = np.array(ll[1])
     print heatmap
