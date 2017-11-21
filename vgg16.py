@@ -12,8 +12,9 @@ import tensorflow as tf
 import numpy as np
 from scipy.misc import imread, imresize, toimage, imsave
 from imagenet_classes import class_names
+from tensorflow.python.framework import ops
+from tensorflow.python.ops import gen_nn_ops
 import double2image
-from heatmap import GradCam
 
 class vgg16:
     def __init__(self, imgs, weights=None, sess=None, label=1):
@@ -21,14 +22,14 @@ class vgg16:
         self.convlayers()
         self.fc_layers()
         self.probs = tf.nn.softmax(self.fc3l)
-        #self.heat_map(self.pool2, label)
         if weights is not None and sess is not None:
             self.load_weights(weights, sess)
-
 
     def convlayers(self):
         self.parameters = []
 
+        # g = tf.get_default_graph()
+        # with g.gradient_override_map({'Relu': 'GuidedRelu'}):
         # zero-mean input
         with tf.name_scope('preprocess') as scope:
             mean = tf.constant([123.68, 116.779, 103.939], dtype=tf.float32, shape=[1, 1, 1, 3], name='img_mean')
@@ -213,6 +214,8 @@ class vgg16:
                                name='pool4')
 
     def fc_layers(self):
+        # g = tf.get_default_graph()
+        # with g.gradient_override_map({'Relu': 'GuidedRelu'}):
         # fc1
         with tf.name_scope('fc1') as scope:
             shape = int(np.prod(self.pool5.get_shape()[1:]))
@@ -253,61 +256,4 @@ class vgg16:
         for i, k in enumerate(keys):
             print i, k, np.shape(weights[k])
             sess.run(self.parameters[i].assign(weights[k]))
-    def heat_map(self, layer, category):
-        #print 'probs shape ', self.probs.get_shape()
-        target = self.probs[0, category]
-        grads = tf.gradients(target,
-                             layer,
-                             grad_ys=None,
-                             name='gradients')[0]
-        print 'grads', grads.get_shape()
-        weights = tf.reduce_sum(grads, axis = [0, 1, 2])
-        print weights.get_shape()
-        #weights = tf.expand_dims(weights, 0)
-        #weights = tf.expand_dims(weights, 0)
-        #weights = tf.expand_dims(weights, 0)
-        #dims = self.conv5_3.get_shape()
-        #weights = tf.tile(weights, [dims[0], dims[1], dim[2], 1])
-        heatmap = tf.squeeze(tf.tensordot(layer, weights, [[3], [0]]))
-        #print 'heatmap size ', heatmap.get_shape()
-        #print heatmap
-        self.heatmap = tf.nn.relu(heatmap)
-        
-        
-        
-## This part is for deconv        
-#class heat_map:
-#    def __init__(self, image, sess, vgg_model, category):
-#        '''
-#        Initialize the heat_map class
-#        '''
-#        self.vgg = vgg_model
-#        self.sess = sess
-#        self.img = image
-#        self.probs = self.sess.run(self.vgg, feed_dict={vgg.imgs:[img1]})[0]
-#        self.target = self.vgg.probs[category]
-#        tf.gradients()
 
-if __name__ == '__main__':
-    sess = tf.Session()
-    imgs = tf.placeholder(tf.float32, [None, 224, 224, 3])
-    vgg = vgg16(imgs, 'vgg16_weights.npz', sess, 242)
-
-    img1 = imread('cat_dog.jpg', mode='RGB')
-    img1 = imresize(img1, (224, 224))
-    gradcam = GradCam(vgg.probs, vgg.pool5)
-    tf.summary.FileWriter('tf.log', sess.graph)
-    ll = sess.run([vgg.probs, gradcam.heatmap], feed_dict={vgg.imgs: [img1]})
-    prob = ll[0][0]
-    heatmap = np.array(ll[1])
-    print heatmap
-    heatmap = toimage(heatmap)
-    #heatmap = double2image.to_image(heatmap)
-    heatmap = imresize(heatmap, (224, 224))
-    imsave('gradcam.png', heatmap)
-    print np.shape(prob)
-    print np.shape(heatmap)
-    print heatmap
-    preds = (np.argsort(prob)[::-1])[0:5]
-    for p in preds:
-        print p, class_names[p], prob[p]
