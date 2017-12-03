@@ -249,11 +249,19 @@ class vgg16:
                                  trainable=True, name='biases')
             self.fc3l = tf.nn.bias_add(tf.matmul(self.fc2, fc3w), fc3b)
             self.parameters += [fc3w, fc3b]
-
+        # new fc3
+        with tf.name_scope('new_fc3') as scope:
+            new_fc3w = tf.Variable(tf.truncated_normal([4096, 10],
+            dtype = tf.float32, stddev = 1e-1), name = 'weights')
+            new_fc3b = tf.Variable(tf.constant(0, shape = [10], dtype = tf.float32),
+            trainable = True, name="biases") 
+            self.new_fc3l = tf.nn.bias_add(tf.matmul(self.fc2, new_fc3w), new_fc3b)
+        with tf.name_scope('loss') as scope:
+            self.labels = tf.placeholder(tf.float32, [None, 10])
+            self.loss = tf.nn.softmax_cross_entropy_with_logits(labels = self.labels, logits = self.new_fc3l)
     def load_weights(self, weight_file, sess):
         weights = np.load(weight_file)
         keys = sorted(weights.keys())
         for i, k in enumerate(keys):
             print i, k, np.shape(weights[k])
             sess.run(self.parameters[i].assign(weights[k]))
-
